@@ -1,4 +1,4 @@
-FROM alpine:3.19
+FROM alpine:3.20
 
 #Install dependencies and fix issue in apache
 RUN apk --no-cache upgrade
@@ -8,7 +8,7 @@ RUN apk add --no-cache \
     php83-xml php83-xsl php83-gd php83-zip php83-soap php83-mbstring php83-zlib \
     php83-mysqli php83-sockets php83-xmlreader php83-redis php83-simplexml php83-xmlwriter php83-phar php83-fileinfo \
     php83-sodium php83-calendar php83-intl php83-opcache php83-pecl-apcu php83-fpm \
-    perl mysql-client tar curl imagemagick nodejs npm \
+    perl mysql-client mariadb-connector-c tar curl imagemagick nodejs npm \
     certbot openssl openssl-dev dcron \
     rsync shadow ncurses \
     && sed -i 's/^Listen 80$/Listen 0.0.0.0:80/' /etc/apache2/httpd.conf
@@ -21,7 +21,7 @@ RUN cp /usr/bin/php83 /usr/bin/php
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin --filename=composer
 
 RUN apk add --no-cache git build-base \
-    && git clone https://github.com/openemr/openemr.git --depth 1 \
+    && git clone https://github.com/openemr/openemr.git --branch rel-703 --depth 1 \
     && rm -rf openemr/.git \
     && cd openemr \
     && composer install --no-dev \
@@ -67,6 +67,7 @@ COPY upgrade/docker-version \
      upgrade/fsupgrade-4.sh \
      upgrade/fsupgrade-5.sh \
      upgrade/fsupgrade-6.sh \
+     upgrade/fsupgrade-7.sh \
      /root/
 RUN chmod 500 \
     /root/fsupgrade-1.sh \
@@ -74,7 +75,8 @@ RUN chmod 500 \
     /root/fsupgrade-3.sh \
     /root/fsupgrade-4.sh \
     /root/fsupgrade-5.sh \
-    /root/fsupgrade-6.sh
+    /root/fsupgrade-6.sh \
+    /root/fsupgrade-7.sh
 #fix issue with apache2 dying prematurely
 RUN mkdir -p /run/apache2
 #Copy dev tools library to root
